@@ -15,6 +15,7 @@ class Region(Base):
         return "<Region(region_name='%s')>" % (self.region_name)
 
 # State is parent of Park
+# There seems to be a problem to populate the region_id in the database. Why?
 class State(Base):
     __tablename__ = 'State'
 # This should be to have the name somewhat unique. Don't think I need that.

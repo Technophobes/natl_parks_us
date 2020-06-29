@@ -103,11 +103,29 @@ def get_park(search_term):
 			return_list.append(row_dict)
 	return jsonify(return_list)
 
-# # Patch or Put to update a park
-# @app.route('/park',  methods=['PATCH'])
+# Patch or Put to update a park
+# https://devcamp.com/trails/python-api-development-with-flask/campsites/hello-flask/guides/guide-building-update-action-put-request-flask
+@app.route('/park/update/<search_term>',  methods=['PUT'])
+def update_park(search_term):
+    session = dbconnect()
+    park = Park.query.get(search_term)
+    park_name = request.json["Unit Name"]
 
-# # Delete Park
-# @app.route('/park',  methods=['DELETE'])
+    park.park_name = park_name
+
+    db.session.commit()
+    return "Park has been updated", 200
+
+
+# Delete Park
+# https://devcamp.com/trails/python-api-development-with-flask/campsites/279/guides/how-to-build-delete-api-endpoint-flask-project-summary
+@app.route('/park/delete/<search_term>',  methods=['DELETE'])
+def delete_park(search_term):
+    session = dbconnect()
+    park = Park.query.get(search_term)
+    db.session.delete(park)
+    db.session.commit()
+    return "Park has been deleted", 200
 
 
 # This provides the error message on the url
