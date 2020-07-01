@@ -32,22 +32,23 @@ def add_region():
 
 @app.route('/state', methods=['POST'])
 def add_state():
-    session = dbconnect()
-    request_dict = request.get_json()
-    try: 
-        region_instance = session.query(Region).filter(Region.id == request_dict["region_id"]).one()
-    except: 
-        return "Region does not exist, please add it", 400
+	session = dbconnect()
+	request_dict = request.get_json()
+	try: 
+		region_instance = session.query(Region).filter(Region.id == request_dict["region_id"]).one()
+	except: 
+		return "Region does not exist, please add it", 400
 
-    try:
-        state_instance = State()
-        state_instance.state_name = request_dict["State"]
-        session.add(state_instance)
-        session.commit()
-        return jsonify(state_instance.id)
-    except exc.IntegrityError:
-        session.rollback()
-        return "already exists", 400
+	try:
+		state_instance = State()
+		state_instance.state_name = request_dict["State"]
+		state_instance.region_id = request_dict["region_id"]
+		session.add(state_instance)
+		session.commit()
+		return jsonify(state_instance.id)
+	except exc.IntegrityError:
+		session.rollback()
+		return "already exists", 400
 
 @app.route('/park',  methods=['POST'])
 def add_park():

@@ -12,14 +12,15 @@ def wrangle(input_object):
     pload_region = {"Region": input_dict["Region"]}
     region_request = requests.get("http://127.0.0.1:5000/region/{}".format(input_dict["Region"]))
     if region_request.status_code == 400:
+        # pload_region isn't necessary, could also be input_dict, pload_region just means passing less data
         region_request = requests.post("http://127.0.0.1:5000/region" , json=pload_region)
+    # creating region id as response
     input_dict["region_id"] = region_request.text
 
-    # THIS DOESN'T SEEM TO MATTER. WHY?!
     # state_request = requests.get("http://127.0.0.1:5000/state/{}".format(input_dict["State"]))
     # if state_request.status_code == 400:
-    #     state_request = requests.post("http://127.0.0.1:5000/state" , json=pload_state)
-    # input_dict["state_id"] = state_request.text
+    #     state_request = requests.post("http://127.0.0.1:5000/state" , json=input_dict)
+    input_dict["state_id"] = state_request.text
 
     # This adds the entry's State
     # Why don't i need to be more specific? Even if the region already exists, that doesn't mean the state does

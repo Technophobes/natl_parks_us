@@ -6,12 +6,13 @@ def add_park_from_queue(request_dict):
     try:
         state_instance = session.query(State).filter(State.id == request_dict["state_id"]).one()
     except:
-        # wrong. Not sure why this was wrong before? Json stuff only
         return "State does not exist, please add it", 400
 
     try:
         park = Park()
         park.park_name = request_dict["Park"]
+        park.year_founded = request_dict["YearRaw"]
+        park.state_id = request_dict["state_id"]
         park.state = state_instance
         session.add(park)
         session.commit()
@@ -20,5 +21,4 @@ def add_park_from_queue(request_dict):
 
     except exc.IntegrityError:
         session.rollback()
-        # wrong
         return "already exists", 400
