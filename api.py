@@ -6,6 +6,7 @@ from flask import request
 from flask_cors import CORS
 from model import dbconnect, Region, State, Park
 from sqlalchemy import exc
+from sqlalchemy.exc import SQLAlchemyError
 from redis import Redis
 from rq import Queue
 from park_queue import add_park_from_queue
@@ -36,8 +37,8 @@ def add_state():
 	request_dict = request.get_json()
 	try: 
 		region_instance = session.query(Region).filter(Region.id == request_dict["region_id"]).one()
-	except: 
-		return "Region does not exist, please add it", 400
+	except exc.SQLAlchemyError as e: 
+		print(e)
 
 	try:
 		state_instance = State()
@@ -82,11 +83,17 @@ def get_state(search_term):
 			row_dict.pop("_sa_instance_state")
 			return_list.append(row_dict)
 	else:
-		for row in session.query(State).filter(State.state_name == search_term).all():
-			row_dict = row.__dict__
-			row_dict.pop("_sa_instance_state")
-			return_list.append(row_dict)
-	return jsonify(return_list)
+		try:
+			for row in session.query(State).filter(State.state_name == search_term).one():
+				row_dict = row.__dict__
+				row_dict.pop("_sa_instance_state")
+				return_list.append(row_dict)
+				# This is where it is horribly broken. Should not be sending a list here.
+				return jsonify(return_list)
+		except:
+			return "State does not exist", 400
+			
+	
 
 @app.route('/park/<search_term>', methods=['GET'])
 def get_park(search_term):
@@ -98,35 +105,38 @@ def get_park(search_term):
 			row_dict.pop("_sa_instance_state")
 			return_list.append(row_dict)
 	else:
-		for row in session.query(Park).filter(Park.park_name == search_term).all():
-			row_dict = row.__dict__
-			row_dict.pop("_sa_instance_state")
-			return_list.append(row_dict)
-	return jsonify(return_list)
+		try:
+			for row in session.query(Park).filter(Park.park_name == search_term).one():
+				row_dict = row.__dict__
+				row_dict.pop("_sa_instance_state")
+				return_list.append(row_dict)
+			return jsonify(return_list)
+		except:
+			"Park doesn't exist", 400
 
-# Patch or Put to update a park
-# https://devcamp.com/trails/python-api-development-with-flask/campsites/hello-flask/guides/guide-building-update-action-put-request-flask
-@app.route('/park/update/<search_term>',  methods=['PUT'])
-def update_park(search_term):
-    session = dbconnect()
-    park = Park.query.get(search_term)
-    park_name = request.json["Unit Name"]
+# # Patch or Put to update a park
+# # https://devcamp.com/trails/python-api-development-with-flask/campsites/hello-flask/guides/guide-building-update-action-put-request-flask
+# @app.route('/park/update/<search_term>',  methods=['PUT'])
+# def update_park(search_term):
+#     session = dbconnect()
+#     park = Park.query.get(search_term)
+#     park_name = request.json["Unit Name"]
 
-    park.park_name = park_name
+#     park.park_name = park_name
 
-    db.session.commit()
-    return "Park has been updated", 200
+#     db.session.commit()
+#     return "Park has been updated", 200
 
 
-# Delete Park
-# https://devcamp.com/trails/python-api-development-with-flask/campsites/279/guides/how-to-build-delete-api-endpoint-flask-project-summary
-@app.route('/park/delete/<search_term>',  methods=['DELETE'])
-def delete_park(search_term):
-    session = dbconnect()
-    park = Park.query.get(search_term)
-    db.session.delete(park)
-    db.session.commit()
-    return "Park has been deleted", 200
+# # Delete Park
+# # https://devcamp.com/trails/python-api-development-with-flask/campsites/279/guides/how-to-build-delete-api-endpoint-flask-project-summary
+# @app.route('/park/delete/<search_term>',  methods=['DELETE'])
+# def delete_park(search_term):
+#     session = dbconnect()
+#     park = Park.query.get(search_term)
+#     session.delete(park)
+#     session.commit()
+#     return "Park has been deleted", 200
 
 
 # This provides the error message on the url

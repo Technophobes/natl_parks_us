@@ -10,7 +10,7 @@ def add_park_from_queue(request_dict):
 
     try:
         park = Park()
-        park.park_name = request_dict["Park"]
+        park.park_name = request_dict["Unit Name"]
         park.year_founded = request_dict["YearRaw"]
         park.state_id = request_dict["state_id"]
         park.state = state_instance
