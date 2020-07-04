@@ -89,6 +89,7 @@ def get_state(search_term):
 				row_dict.pop("_sa_instance_state")
 				return_list.append(row_dict)
 				# This is where it is horribly broken. Should not be sending a list here.
+				# What is return_list?
 				return jsonify(return_list)
 		except:
 			return "State does not exist", 400
